@@ -1,6 +1,6 @@
 "use strict";
 
-let main = async () => {
+var main = async () => {
     let debug = true;
     let dlog = function (...args) {
         if (debug) console.log(...args);
