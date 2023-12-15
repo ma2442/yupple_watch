@@ -1,0 +1,18 @@
+{
+    "manifest_version": 3,
+    "name": "ゆっぷるウォッチ",
+    "description": "ユーチューブのチャンネルや動画の情報取得を簡単に行う。",
+    "version": "1.0.0",
+    "homepage_url": "https://github.com/ma2442/yupple_watch",
+
+    "action": {
+        "default_popup": "popup.html"
+    },
+
+    "icons": {
+        "48": "icons/yupple_watch_48.png"
+    },
+    "options_page": "options.html",
+    "permissions": ["activeTab", "storage"],
+    "host_permissions": ["*://*.youtube.com/*"]
+}
