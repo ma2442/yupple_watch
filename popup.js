@@ -3,18 +3,23 @@
 // youtube data api v3 で を取得するスクリプト
 
 var main = async () => {
+    let debug = true;
+    let dlog = function (...args) {
+        if (debug) console.log(...args);
+    };
+
     //////////////////////////////////////////////////////////////////
     // 与えられた動画id(urlの watch?v=~~~ の部分)
     // から動画情報を取得する関数
     //////////////////////////////////////////////////////////////////
-    let fetchVideoInfo = async (videoId) => {
+    const fetchVideoInfo = async (videoId) => {
         const req =
             "https://youtube.googleapis.com/youtube/v3/videos?" +
-            "part=snippet" +
+            "part=snippet,contentDetails,statistics,status" +
             `&id=${videoId}` +
             `&key=${apiKey}`;
 
-        let ytJson = await fetchYtJson(req);
+        const ytJson = await fetchYtJson(req);
         await chrome.storage.local.set({ ytJson: ytJson });
     };
 
@@ -23,11 +28,11 @@ var main = async () => {
     // (チャンネルページで@から始まるチャンネルの識別文字列)
     // からチャンネル情報を取得する関数
     //////////////////////////////////////////////////////////////////
-    let fetchChannelInfo = async (url) => {
+    const fetchChannelInfo = async (url) => {
         // チャンネルAからチャンネルBにページ遷移した場合、
         // RSSのchannel_id= がAのもののままで目的のBのチャンネルIDが取得できない。
         // そのため、改めてGETでアクセスしなおしてチャンネルBのチャンネルIDを取得する。
-        let channelId = await fetchChannelId(url);
+        const channelId = await fetchChannelId(url);
 
         // youtube data api からチャネル情報取得
         const req =
@@ -36,20 +41,20 @@ var main = async () => {
             `&id=${channelId}` +
             `&key=${apiKey}`;
 
-        let ytJson = await fetchYtJson(req);
+        const ytJson = await fetchYtJson(req);
         await chrome.storage.local.set({ ytJson: ytJson });
     };
 
     //////////////////////////////////////////////////////////////////
     // youtubeチャンネルページにアクセスしてchannel_idをとってくる関数
     //////////////////////////////////////////////////////////////////
-    let fetchChannelId = async (url) => {
+    const fetchChannelId = async (url) => {
         const options = {
             method: "GET",
             body: null,
         };
 
-        let id = await fetchYtChannelPage(url.href);
+        const id = await fetchYtChannelPage(url.href);
         console.log("channel id: " + id);
         return id;
     };
@@ -62,8 +67,8 @@ var main = async () => {
             method: "GET",
             body: null,
         };
-        let response = await fetch(req, options);
-        let html = await response.text();
+        const response = await fetch(req, options);
+        const html = await response.text();
         console.log("html :" + html);
         let id = html
             .match(/feeds\/videos.xml\?channel_id=([\w-]+)"/)[1]
@@ -74,14 +79,14 @@ var main = async () => {
     //////////////////////////////////////////////////////////////////
     // youtube Data API v3 を用いてjson情報を取得する関数
     //////////////////////////////////////////////////////////////////
-    let fetchYtJson = async (req) => {
+    const fetchYtJson = async (req) => {
         console.log(`fetch youtube json from ${req}`);
         const options = {
             method: "GET",
             body: null,
         };
-        let response = await fetch(req, options);
-        let json = await response.json();
+        const response = await fetch(req, options);
+        const json = await response.json();
         console.log(`result: \n${JSON.stringify(json, null, "  ")}`);
         return json;
     };
@@ -89,18 +94,46 @@ var main = async () => {
     //////////////////////////////////////////////////////////////////
     // チャンネル情報を表示する関数
     //////////////////////////////////////////////////////////////////
-    let dispChannelInfo = async () => {
-        let { ytJson } = await chrome.storage.local.get("ytJson");
+    const dispChannelInfo = async () => {
+        const { ytJson } = await chrome.storage.local.get("ytJson");
         console.log("%o", ytJson);
 
-        const { brandingSettings, snippet, id } = ytJson.items[0];
-        const { title, customUrl, thumbnails } = snippet;
-
-        let keywords = brandingSettings?.channel?.keywords || "(なし)";
-        let keywordsDisp = keywords
+        const { brandingSettings, snippet, id, statistics } = ytJson.items[0];
+        const { publishedAt, title, thumbnails, customUrl } = snippet;
+        const { viewCount, subscriberCount, videoCount } = statistics;
+        const keywords = brandingSettings?.channel?.keywords || "(なし)";
+        const keywordsDisp = keywords
             .split_outside_dquotes(" ")
             ?.join("\r\n")
             .replace(/"/g, "");
+
+        const chUrl = new URL(
+            "https://www.youtube.com/" + customUrl + "/videos"
+        );
+
+        // 自動的にコピーがONならコピーしてログを表示する。
+        if (autoCopy) {
+            const copyText = [
+                chUrl.href,
+                title,
+                Number(subscriberCount).toLocaleString() + "人",
+                Number(viewCount).toLocaleString() + "回",
+                Number(videoCount).toLocaleString() + "本",
+                new Date(publishedAt).toLocaleString("ja-JP"),
+                id,
+                keywordsDisp.replace(/\r\n/g, ",  "),
+            ].join("\t");
+
+            dlog(copyText);
+            await navigator.clipboard.writeText(copyText);
+
+            document.querySelector("#debug_log").style.display = "inline";
+            document.querySelector("#debug").textContent = copyText.replace(
+                /\t/g,
+                "\r\n"
+            );
+        }
+
         document.querySelector("#keywords").innerText = keywordsDisp;
         document.querySelector("#channel_id").value = id;
         document.querySelector("#channel_title").value = title;
@@ -114,21 +147,74 @@ var main = async () => {
     //////////////////////////////////////////////////////////////////
     // 動画情報を表示する関数
     //////////////////////////////////////////////////////////////////
-    let dispVideoInfo = async () => {
-        let { ytJson } = await chrome.storage.local.get("ytJson");
+    const dispVideoInfo = async () => {
+        const { ytJson } = await chrome.storage.local.get("ytJson");
         console.log("%o", ytJson);
 
-        let { snippet, id } = ytJson.items[0];
-        let { categoryId, title, tags, thumbnails } = snippet;
-        let tagsDisp = tags?.join("\n") || "(なし)";
+        const { snippet, id, statistics, contentDetails } = ytJson.items[0];
+        const {
+            categoryId,
+            title,
+            tags,
+            thumbnails,
+            publishedAt,
+            channelTitle,
+            channelId,
+        } = snippet;
+        const { duration } = contentDetails;
+        const { viewCount, likeCount, favoriteCount, commentCount } =
+            statistics;
+        const when = new Date(publishedAt).toLocaleString("ja-JP");
+        const videoUrl = new URL("https://www.youtube.com/watch?v=" + id);
+        const channelUrl = new URL(
+            "https://www.youtube.com/channel/" + channelId + "/videos"
+        );
+        const durationHour =
+            (duration.match(/(\d+)H/)?.[1] ?? 0) +
+            (duration.match(/(\d+)D/)?.[1] ?? 0);
+        const durationMinute = duration.match(/(\d+)M/)?.[1] ?? 0;
+        const durationSec = duration.match(/(\d+)S/)?.[1] ?? 0;
+        const durationDisp =
+            durationHour +
+            ":" +
+            ("00" + durationMinute).slice(-2) +
+            ":" +
+            ("00" + durationSec).slice(-2);
 
+        // 自動的にコピーがONならコピーしてログを表示する。
+        if (autoCopy) {
+            const copyText = [
+                videoUrl.href,
+                title,
+                Number(viewCount).toLocaleString() + "回",
+                when,
+                durationDisp,
+                channelUrl,
+                channelTitle,
+                Number(likeCount).toLocaleString() + " likes",
+                Number(favoriteCount).toLocaleString() + " favs",
+                Number(commentCount).toLocaleString() + "コメ",
+                `${categoryId} ${categoryName[categoryId]}`,
+                tags?.join(",  ") || "(なし)",
+            ].join("\t");
+
+            dlog(copyText);
+            await navigator.clipboard.writeText(copyText);
+            document.querySelector("#debug_log").style.display = "inline";
+            document.querySelector("#debug").textContent = copyText.replace(
+                /\t/g,
+                "\r\n"
+            );
+        }
+
+        const tagsDisp = tags?.join("\n") || "(なし)";
         document.querySelector("#video_id").value = id;
         document.querySelector("#video_title").value = title;
         document.querySelector(
             "#category_id"
         ).value = `${categoryId}   ${categoryName[categoryId]}`;
         document.querySelector("#tags").innerText = tagsDisp;
-        let thumbnail =
+        const thumbnail =
             thumbnails.maxres ||
             thumbnails.standard ||
             thumbnails.high ||
@@ -140,7 +226,7 @@ var main = async () => {
     //////////////////////////////////////////////////////////////////
     // 動画カテゴリリスト
     //////////////////////////////////////////////////////////////////
-    let categoryName = {};
+    const categoryName = {};
     categoryName[1] = "映画とアニメ";
     categoryName[2] = "自動車と乗り物";
     categoryName[10] = "音楽";
@@ -238,8 +324,12 @@ var main = async () => {
     // 実行部
     //////////////////////////////////////////////////////////////////
     // API KEY 設定値取得
-    let { apiKey } = await chrome.storage.local.get("apiKey");
-    console.log("API KEY: ", apiKey);
+    const { apiKey, autoCopy } = await chrome.storage.local.get([
+        "apiKey",
+        "autoCopy",
+    ]);
+    dlog("API KEY: ", apiKey);
+    dlog("auto copy: ", autoCopy);
 
     // アクティブタブのURL取得
     const tabs = await chrome.tabs.query({
@@ -256,8 +346,8 @@ var main = async () => {
     const paths = url.pathname.split("/");
 
     // ポップアップ表示調整関数
-    let dispInfo = async (id) => {
-        let idArr = [
+    const dispInfo = async (id) => {
+        const idArr = [
             "no_api_key_info",
             "description_info",
             "channel_info",

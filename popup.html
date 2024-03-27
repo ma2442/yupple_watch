@@ -1,152 +1,153 @@
 <!DOCTYPE html>
 <html lang="jp">
-    <style>
-        body {
-            min-width: 160px;
-            min-height: 50px;
-        }
-    </style>
-    <head>
-        <meta charset="UTF-8" />
-        <title>ゆっぷるウォッチ</title>
-    </head>
-    <body>
-        <!-- <button id="btn">ウォッチ！</button> -->
-        <script src="popup.js"></script>
-        <div id="no_api_key_info" style="display: none">
-            <hr class="no_api_key_hr" />
-            <div id="no_api_key">
-                <a href="./options.html" target="_blank">⚙️オプション</a>でAPI
-                KEYを設定してね！
-            </div>
-        </div>
-        <!-- 説明文 -->
-        <div id="description_info" style="display: inline">
-            <hr class="description_hr" />
-            <div id="description">
-                youtube のチャンネルページか動画ページを表示してから開いてね！
-                <br />
-                <a href="./options.html" target="_blank">⚙️オプション</a>
-            </div>
-        </div>
-        <!-- チャンネルインフォメーション -->
-        <div id="channel_info" style="display: none">
-            <hr class="channel_hr" />
-            <div style="text-align: center">
-                <img
-                    id="channel_thumbnail"
-                    alt="アイコン"
-                    width="88"
-                    height="88"
-                    style="object-fit: cover"
-                />
-            </div>
-            <div>
-                channel_title :<br />
-                <input type="text" id="channel_title" size="30" />
-            </div>
-            <div>
-                custom_url :<br />
-                <input type="text" id="custom_url" size="30" />
-            </div>
-            <div>
-                channel_id :<br />
-                <input type="text" id="channel_id" size="30" />
-            </div>
-            <div>
-                brandingSettings.channel.keywords :<br />
-                <div id="keywords" class="list"></div>
-            </div>
-        </div>
-        <!-- 動画インフォメーション -->
-        <div id="video_info" style="display: none">
-            <hr class="video_hr" />
+<style>
+    body {
+        min-width: 160px;
+        min-height: 50px;
+    }
+</style>
 
-            <!-- (none)default.jpg mq hq sd maxres -->
-            <!-- src="https://i.ytimg.com/vi/video_id/maxresdefault.jpg" -->
-            <!-- style="object-fit: cover" 画面の縦横比はそのままで表示領域いっぱいにセンター表示。縦か横のみはみ出す。 -->
-            <img
-                id="video_thumbnail"
-                alt="サムネイル"
-                width="320"
-                height="180"
-                style="object-fit: cover"
-            />
-            <div>
-                title :<br />
-                <input type="text" id="video_title" size="30" />
-            </div>
-            <div>
-                video_id :<br />
-                <input type="text" id="video_id" size="30" />
-            </div>
-            <div>
-                category_id :<br />
-                <input type="text" id="category_id" size="30" />
-            </div>
-            <div>
-                tags :<br />
-                <div id="tags" class="list"></div>
-            </div>
+<head>
+    <meta charset="UTF-8" />
+    <title>ゆっぷるウォッチ</title>
+</head>
+
+<body>
+    <!-- <button id="btn">ウォッチ！</button> -->
+    <script src="popup.js"></script>
+    <div id="no_api_key_info" style="display: none">
+        <hr class="no_api_key_hr" />
+        <div id="no_api_key">
+            <a href="./options.html" target="_blank">⚙️オプション</a>でAPI
+            KEYを設定してね！
         </div>
-        <div id="debug_log" style="display: none">
-            <hr class="debug_hr" />
-            <div>
-                詳細はアイコンを右クリックして「ポップアップを検証」から見てね！
-            </div>
-            <textarea id="debug" cols="30" rows="0"></textarea>
+    </div>
+    <!-- 説明文 -->
+    <div id="description_info" style="display: inline">
+        <hr class="description_hr" />
+        <div id="description">
+            youtube のチャンネルページか動画ページを表示してから開いてね！
+            <br />
+            <a href="./options.html" target="_blank">⚙️オプション</a>
         </div>
-    </body>
-    <style type="text/css">
-        input[type="text"],
-        textarea,
-        #description,
-        #no_api_key {
-            min-width: 312px;
-        }
-        .list {
-            border: 1px solid black;
-            padding: 0px 3px;
-            max-height: 240px;
-            overflow: auto;
-            text-align: left;
-        }
-        hr {
-            height: 0px;
-            margin: 0px;
-            padding: 0px;
-            border: 0px;
-        }
-        hr {
-            margin-top: 20px;
-            padding: 7px 0px;
-            overflow: visible;
-            border-top: 5px solid cornflowerblue;
-            text-align: center;
-        }
-        hr::after {
-            display: inline-block;
-            position: relative;
-            top: -20px;
-            padding: 0px 10px;
-            background: #fff;
-            color: cornflowerblue;
-            font-size: 15px;
-        }
-        .no_api_key_hr::after {
-            content: "アンナイ";
-        }
-        .description_hr::after {
-            content: "セツメイ";
-        }
-        .channel_hr::after {
-            content: "チャンネルinfo";
-        }
-        .video_hr::after {
-            content: "ドウガinfo";
-        }
-        .debug_hr::after {
-            content: "debug log";
-        }
-    </style>
+    </div>
+    <!-- チャンネルインフォメーション -->
+    <div id="channel_info" style="display: none">
+        <hr class="channel_hr" />
+        <div style="text-align: center">
+            <img id="channel_thumbnail" alt="アイコン" width="88" height="88" style="object-fit: cover" />
+        </div>
+        <div>
+            channel_title :<br />
+            <input type="text" id="channel_title" size="30" />
+        </div>
+        <div>
+            custom_url :<br />
+            <input type="text" id="custom_url" size="30" />
+        </div>
+        <div>
+            channel_id :<br />
+            <input type="text" id="channel_id" size="30" />
+        </div>
+        <div>
+            brandingSettings.channel.keywords :<br />
+            <div id="keywords" class="list"></div>
+        </div>
+    </div>
+    <!-- 動画インフォメーション -->
+    <div id="video_info" style="display: none">
+        <hr class="video_hr" />
+
+        <!-- (none)default.jpg mq hq sd maxres -->
+        <!-- src="https://i.ytimg.com/vi/video_id/maxresdefault.jpg" -->
+        <!-- style="object-fit: cover" 画面の縦横比はそのままで表示領域いっぱいにセンター表示。縦か横のみはみ出す。 -->
+        <img id="video_thumbnail" alt="サムネイル" width="320" height="180" style="object-fit: cover" />
+        <div>
+            title :<br />
+            <input type="text" id="video_title" size="30" />
+        </div>
+        <div>
+            video_id :<br />
+            <input type="text" id="video_id" size="30" />
+        </div>
+        <div>
+            category_id :<br />
+            <input type="text" id="category_id" size="30" />
+        </div>
+        <div>
+            tags :<br />
+            <div id="tags" class="list"></div>
+        </div>
+    </div>
+    <div id="debug_log" style="display: none">
+        <hr class="debug_hr" />
+
+        <textarea id="debug" cols="30" rows="15"></textarea>
+        <div style="font-size:0.5em">
+            詳細はアイコン右クリック「ポップアップを検証」から
+        </div>
+    </div>
+</body>
+<style type="text/css">
+    input[type="text"],
+    textarea,
+    #description,
+    #no_api_key {
+        min-width: 312px;
+    }
+
+    .list {
+        border: 1px solid black;
+        padding: 0px 3px;
+        max-height: 240px;
+        overflow: auto;
+        text-align: left;
+    }
+
+    hr {
+        height: 0px;
+        margin: 0px;
+        padding: 0px;
+        border: 0px;
+    }
+
+    hr {
+        margin-top: 20px;
+        padding: 7px 0px;
+        overflow: visible;
+        border-top: 5px solid cornflowerblue;
+        text-align: center;
+    }
+
+    hr::after {
+        display: inline-block;
+        position: relative;
+        top: -20px;
+        padding: 0px 10px;
+        background: #fff;
+        color: cornflowerblue;
+        font-size: 15px;
+    }
+
+    .no_api_key_hr::after {
+        content: "アンナイ";
+    }
+
+    .description_hr::after {
+        content: "セツメイ";
+    }
+
+    .channel_hr::after {
+        content: "チャンネルinfo";
+    }
+
+    .video_hr::after {
+        content: "ドウガinfo";
+    }
+
+    .debug_hr::after {
+        content: "debug log(コピーした内容など)";
+    }
+</style>
+
 </html>

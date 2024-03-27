@@ -1,33 +1,44 @@
 <!DOCTYPE html>
 <html lang="jp">
-    <style></style>
-    <head>
-        <meta charset="UTF-8" />
-        <title>設定（ゆっぷるウォッチ）</title>
-    </head>
-    <body>
-        <script src="options.js"></script>
-        <h1>ゆっぷるウォッチ　ー　設定　ー</h1>
-        YOUTUBE API KEY:<br />
-        <input type="text" value="" id="api_key" /><br />
-        <button id="save">保存</button>
-        <button id="test">APIテスト(ポイント１消費)</button><br />
-        <br />
-        <div id="log"></div>
-    </body>
-    <style type="text/css">
-        body {
-            font-size: 1em;
-        }
-        button {
-            font-size: 1em;
-        }
-        input {
-            width: 30em;
-            font-size: 1em;
-        }
-        #log {
-            font-size: 1em;
-        }
-    </style>
+<style></style>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>設定（ゆっぷるウォッチ）</title>
+</head>
+
+<body>
+    <script src="options.js"></script>
+    <h1>ゆっぷるウォッチ　ー　設定　ー</h1>
+    <label>CHや動画情報を自動的にクリップボードにコピー<input type="checkbox" name="auto_copy" id="auto_copy" /></label>
+    <br />
+    YOUTUBE API KEY:<br />
+    <input type=" text" value="" id="api_key" /><br />
+    <br />
+    <button id="save">設定をまとめて保存</button><br />
+    <br />
+    <button id="test">APIテスト(ポイント１消費)</button><br />
+    <br />
+    <div id="log"></div>
+</body>
+<style type="text/css">
+    body {
+        font-size: 1em;
+    }
+
+    button {
+        width: 15em;
+        font-size: 1em;
+    }
+
+    input#api_key {
+        width: 30em;
+        font-size: 1em;
+    }
+
+    #log {
+        font-size: 1em;
+    }
+</style>
+
 </html>

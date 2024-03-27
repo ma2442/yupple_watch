@@ -1,16 +1,16 @@
 "use strict";
 
 var main = async () => {
-    let debug = true;
-    let dlog = function (...args) {
+    const debug = true;
+    const dlog = function (...args) {
         if (debug) console.log(...args);
     };
 
     // getElementByIdを指定回数リトライ Promiseを返す。
-    let getElementByIdPromise = async (id, triesMax) => {
+    const getElementByIdPromise = async (id, triesMax) => {
         if (triesMax == 0) return null;
 
-        let elem = document.getElementById(id);
+        const elem = document.getElementById(id);
         dlog("id", id, "triesMax", triesMax, "%o", elem);
         if (elem) return elem;
 
@@ -19,25 +19,34 @@ var main = async () => {
         return getElementByIdPromise(id, triesMax - 1);
     };
 
-    let save = await getElementByIdPromise("save", 10);
-    let log = await getElementByIdPromise("log", 10);
-    let apiKeyInput = await getElementByIdPromise("api_key", 10);
+    const save = await getElementByIdPromise("save", 10);
+    const log = await getElementByIdPromise("log", 10);
+    const apiKeyInput = await getElementByIdPromise("api_key", 10);
+    const autoCopyCheckbox = await getElementByIdPromise("auto_copy", 10);
 
-    let stored = await chrome.storage.local.get();
-    apiKeyInput.value = stored.apiKey || "";
+    const stored = await chrome.storage.local.get();
+    apiKeyInput.value = stored.apiKey ?? "";
+    autoCopyCheckbox.checked = stored.autoCopy ?? "";
 
-    let saveListener = async (event) => {
+    const saveListener = async (event) => {
         event.target.disabled = true;
         await chrome.storage.local.set({ apiKey: apiKeyInput.value });
-        let { apiKey } = await chrome.storage.local.get("apiKey");
-        log.innerText = `"${apiKey}" をAPI KEYとして保存しました。`;
+        await chrome.storage.local.set({ autoCopy: autoCopyCheckbox.checked });
+        const { apiKey, autoCopy } = await chrome.storage.local.get([
+            "apiKey",
+            "autoCopy",
+        ]);
+        log.innerText =
+            `API KEY: "${apiKey}"\n` +
+            `自動コピー: ${autoCopy ? "ON" : "OFF"}\n` +
+            "として保存しました。";
         event.target.disabled = false;
         return;
     };
 
-    let testListener = async (event) => {
+    const testListener = async (event) => {
         event.target.disabled = true;
-        let { apiKey } = await chrome.storage.local.get("apiKey");
+        const { apiKey } = await chrome.storage.local.get("apiKey");
         let href =
             "https://youtube.googleapis.com/youtube/v3/videoCategories?" +
             "part=snippet" +
