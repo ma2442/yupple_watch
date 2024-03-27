@@ -6,22 +6,9 @@ var main = async () => {
         if (debug) console.log(...args);
     };
 
-    // getElementByIdを指定回数リトライ Promiseを返す。
-    let getElementByIdPromise = async (id, triesMax) => {
-        if (triesMax == 0) return null;
-
-        let elem = document.getElementById(id);
-        dlog("id", id, "triesMax", triesMax, "%o", elem);
-        if (elem) return elem;
-
-        // 少し待ってリトライ
-        await new Promise((ok) => setTimeout(ok, 50));
-        return getElementByIdPromise(id, triesMax - 1);
-    };
-
-    let save = await getElementByIdPromise("save", 10);
-    let log = await getElementByIdPromise("log", 10);
-    let apiKeyInput = await getElementByIdPromise("api_key", 10);
+    let save = await getElementById("save");
+    let log = await getElementById("log");
+    let apiKeyInput = await getElementById("api_key");
 
     let stored = await chrome.storage.local.get();
     apiKeyInput.value = stored.apiKey || "";
