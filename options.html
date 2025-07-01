@@ -11,13 +11,24 @@
     <script src="options.js"></script>
     <h1>ゆっぷるウォッチ　ー　設定　ー</h1>
     <label>CHや動画情報を自動的にクリップボードにコピー<input type="checkbox" name="auto_copy" id="auto_copy" /></label>
+    <br /> <br />
+    <label>動画情報の追加項目 ( status.embeddableなど ) ：<br />
+        <textarea id="vid_extra" cols="30" rows="15" ></textarea>
+    </label>
     <br />
-    YOUTUBE API KEY:<br />
-    <input type=" text" value="" id="api_key" /><br />
+    項目について：<br />
+    <a href="https://developers.google.com/youtube/v3/docs/videos?hl=ja#properties" target="_blank" rel="noopener">
+        https://developers.google.com/youtube/v3/docs/videos?hl=ja#properties
+    </a>
     <br />
-    <button id="save">設定をまとめて保存</button><br />
     <br />
-    <button id="test">APIテスト(ポイント１消費)</button><br />
+    <label>YOUTUBE API KEY:<br />
+        <input type="text" value="" id="api_key" /><br />
+    </label>
+    <br />
+    <button type="button" id="save">設定をまとめて保存</button><br />
+    <br />
+    <button type="button" id="test">APIテスト(ポイント１消費)</button><br />
     <br />
     <div id="log"></div>
 </body>

@@ -37,7 +37,7 @@ var main = async () => {
         // youtube data api からチャネル情報取得
         const req =
             "https://youtube.googleapis.com/youtube/v3/channels?" +
-            "part=snippet,contentDetails,statistics,brandingSettings" +
+            "part=snippet,contentDetails,statistics,brandingSettings,status" +
             `&id=${channelId}` +
             `&key=${apiKey}`;
 
@@ -149,9 +149,50 @@ var main = async () => {
     //////////////////////////////////////////////////////////////////
     const dispVideoInfo = async () => {
         const { ytJson } = await chrome.storage.local.get("ytJson");
+        const { vidExtra } = await chrome.storage.local.get("vidExtra");
         console.log("%o", ytJson);
 
-        const { snippet, id, statistics, contentDetails } = ytJson.items[0];
+        // 追加情報項目がなにかしらあったら表示する。
+        const extraNameArr = vidExtra
+            .replace(/[\r ]/g, "")
+            .split("\n")
+            .filter((x) => x.length > 0);
+        dlog("extraNameArr", extraNameArr);
+
+        // 入れ子になっているobjのプロパティを取得
+        function digProperty(verticalKeys, obj) {
+            // verticalKeys: ["status", "embeddable", ...]
+            // 戻り値 obj["status"]["embeddable"]...
+            let ret = obj;
+            for (let key of verticalKeys) {
+                // key : "status", "embeddable", ...
+                if (ret == null) break;
+                ret = ret[key];
+            }
+            return ret;
+        }
+
+        if (extraNameArr.length > 0) {
+            console.log("ytJson.items[0]", ytJson.items[0]);
+            document.querySelector("#vid_extra_area").style.display = "inline";
+            document.querySelector("#vid_extra").innerText = extraNameArr
+                .map((name) => {
+                    // name : "status.embeddable", ...
+                    console.log('name.split(".")', name.split("."));
+
+                    return (
+                        name +
+                        " : " +
+                        digProperty(name.split("."), ytJson.items[0])
+                    );
+                })
+                .join("\r\n");
+        }
+
+        const { snippet, id, statistics, contentDetails, status } =
+            ytJson.items[0];
+        const { embeddable } = status;
+
         const {
             categoryId,
             title,
@@ -324,12 +365,14 @@ var main = async () => {
     // 実行部
     //////////////////////////////////////////////////////////////////
     // API KEY 設定値取得
-    const { apiKey, autoCopy } = await chrome.storage.local.get([
+    const { apiKey, autoCopy, vidExtra } = await chrome.storage.local.get([
         "apiKey",
         "autoCopy",
+        "vidExtra",
     ]);
     dlog("API KEY: ", apiKey);
     dlog("auto copy: ", autoCopy);
+    dlog("disp extra: ", vidExtra);
 
     // アクティブタブのURL取得
     const tabs = await chrome.tabs.query({

@@ -23,22 +23,29 @@ var main = async () => {
     const log = await getElementByIdPromise("log", 10);
     const apiKeyInput = await getElementByIdPromise("api_key", 10);
     const autoCopyCheckbox = await getElementByIdPromise("auto_copy", 10);
+    const vidExtraTextArea = await getElementByIdPromise("vid_extra", 10);
 
     const stored = await chrome.storage.local.get();
     apiKeyInput.value = stored.apiKey ?? "";
     autoCopyCheckbox.checked = stored.autoCopy ?? "";
+    vidExtraTextArea.value = stored.vidExtra;
 
     const saveListener = async (event) => {
         event.target.disabled = true;
-        await chrome.storage.local.set({ apiKey: apiKeyInput.value });
-        await chrome.storage.local.set({ autoCopy: autoCopyCheckbox.checked });
-        const { apiKey, autoCopy } = await chrome.storage.local.get([
+        await chrome.storage.local.set({
+            apiKey: apiKeyInput.value,
+            autoCopy: autoCopyCheckbox.checked,
+            vidExtra: vidExtraTextArea.value,
+        });
+        const { apiKey, autoCopy, vidExtra } = await chrome.storage.local.get([
             "apiKey",
             "autoCopy",
+            "vidExtra",
         ]);
         log.innerText =
             `API KEY: "${apiKey}"\n` +
             `自動コピー: ${autoCopy ? "ON" : "OFF"}\n` +
+            `動画情報の追加項目: \n${vidExtra}\n` +
             "として保存しました。";
         event.target.disabled = false;
         return;
